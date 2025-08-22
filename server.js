@@ -10,10 +10,16 @@ dotenv.config();
 
 const app = express();
 
+// ✅ Update CORS to allow local dev + Vercel frontend
 app.use(cors({
-  origin: ["http://localhost:5173", "http://127.0.0.1:5173"],
+  origin: [
+    "http://localhost:5173",
+    "http://127.0.0.1:5173",
+    "https://paris-pub.vercel.app" // your Vercel frontend
+  ],
   credentials: false
 }));
+
 app.use(express.json());
 
 // health check
