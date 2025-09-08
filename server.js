@@ -24,16 +24,27 @@ import fs from "fs";
 const app = express();
 
 /* CORS */
-app.use(
-  cors({
-    origin: [
-      "http://localhost:5173",
-      "http://127.0.0.1:5173",
-      "https://paris-pub.vercel.app",
-    ],
-    credentials: false,
-  })
-);
+const allowList = [
+  "http://localhost:5173",
+  "http://127.0.0.1:5173",
+  "https://paris-pub.vercel.app",
+  "https://parispub1.vercel.app",
+];
+const corsOptions = {
+  origin(origin, cb) {
+    // allow same origin or tools like curl with no origin
+    if (!origin) return cb(null, true);
+    if (allowList.includes(origin) || /\.vercel\.app$/.test(origin)) {
+      return cb(null, true);
+    }
+    return cb(new Error("CORS not allowed"), false);
+  },
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+  credentials: false,
+};
+app.use(cors(corsOptions));
+app.options("*", cors(corsOptions));
 
 app.use(express.json());
 
@@ -88,7 +99,7 @@ app.get("/api/menu", async (req, res) => {
 app.get("/api/events", async (_req, res) => {
   try {
     const rows = await Event.find({ active: true }).sort({ start: 1 });
-    res.json(rows);
+  res.json(rows);
   } catch (_err) {
     res.status(500).json({ message: "server error" });
   }
